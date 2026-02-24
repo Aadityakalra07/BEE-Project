@@ -1,0 +1,47 @@
+[
+  {
+    "id": "msg1",
+    "chatId": "c1",
+    "from": "u1",
+    "to": "me",
+    "text": "Hi! How are you?",
+    "timestamp": "2026-02-23T10:00:00Z",
+    "status": "read"
+  },
+  {
+    "id": "msg2",
+    "chatId": "c1",
+    "from": "me",
+    "to": "u1",
+    "text": "I'm good! Nice to connect with you.",
+    "timestamp": "2026-02-23T10:02:00Z",
+    "status": "delivered"
+  },
+  {
+    "id": "msg3",
+    "chatId": "c1",
+    "from": "u1",
+    "to": "me",
+    "text": "Likewise! I saw your profile and found we have similar interests.",
+    "timestamp": "2026-02-23T10:03:00Z",
+    "status": "read"
+  },
+  {
+    "id": "msg4",
+    "chatId": "c1",
+    "from": "me",
+    "to": "u1",
+    "text": "Yes! I noticed you love traveling too. What's your favorite destination?",
+    "timestamp": "2026-02-23T10:05:00Z",
+    "status": "sent"
+  },
+  {
+    "id": "msg5",
+    "chatId": "c1",
+    "from": "u1",
+    "to": "me",
+    "text": "I recently visited Ladakh and it was amazing! 😊",
+    "timestamp": "2026-02-23T10:08:00Z",
+    "status": "read"
+  }
+]

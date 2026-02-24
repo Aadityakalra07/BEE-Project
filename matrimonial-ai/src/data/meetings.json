@@ -1,0 +1,38 @@
+[
+  {
+    "id": "mt1",
+    "users": ["u1", "me"],
+    "userName": "Priya Sharma",
+    "userPhoto": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
+    "date": "2026-03-01",
+    "time": "15:00",
+    "type": "video",
+    "location": "Video Call",
+    "status": "confirmed",
+    "notes": "First virtual meeting"
+  },
+  {
+    "id": "mt2",
+    "users": ["u2", "me"],
+    "userName": "Anita Patel",
+    "userPhoto": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400",
+    "date": "2026-03-05",
+    "time": "17:00",
+    "type": "coffee",
+    "location": "Starbucks, Bandra West",
+    "status": "pending",
+    "notes": "Coffee meeting"
+  },
+  {
+    "id": "mt3",
+    "users": ["u4", "me"],
+    "userName": "Kavya Nair",
+    "userPhoto": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400",
+    "date": "2026-03-10",
+    "time": "18:30",
+    "type": "dinner",
+    "location": "The Bombay Canteen, Lower Parel",
+    "status": "pending",
+    "notes": "Family introduction"
+  }
+]
