@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrueMatch - Online Matrimonial Platform</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      max-width: 600px;
+    }
+    h1 { font-size: 3rem; margin-bottom: 10px; }
+    h2 { font-size: 1.2rem; font-weight: 300; margin-bottom: 30px; opacity: 0.9; }
+    .status { background: rgba(255,255,255,0.2); padding: 15px 30px; border-radius: 10px; display: inline-block; }
+    .status p { font-size: 1.1rem; }
+    .endpoints { text-align: left; margin-top: 30px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; }
+    .endpoints h3 { margin-bottom: 10px; }
+    .endpoints code { display: block; padding: 5px 0; font-size: 0.9rem; opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TrueMatch</h1>
+    <h2>Online Matrimonial Platform API Server</h2>
+    <div class="status">
+      <p>Server is running successfully!</p>
+    </div>
+    <div class="endpoints">
+      <h3>API Endpoints:</h3>
+      <code>POST /api/auth/register</code>
+      <code>POST /api/auth/login</code>
+      <code>GET  /api/auth/me</code>
+      <code>GET  /api/profile</code>
+      <code>GET  /api/profile/search</code>
+      <code>PUT  /api/profile</code>
+      <code>POST /api/interest/:receiverId</code>
+      <code>GET  /api/interest/received</code>
+      <code>GET  /api/interest/sent</code>
+    </div>
+  </div>
+</body>
+</html>
