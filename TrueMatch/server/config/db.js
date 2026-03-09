@@ -8,12 +8,24 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Database Connection Error: ${error.message}`);
-    process.exit(1); // Exit process with failure
+  const maxRetries = 10;
+  const retryDelay = 5000; // 5 seconds
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const conn = await mongoose.connect(process.env.MONGO_URI);
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+      return; // success — exit the loop
+    } catch (error) {
+      console.error(`Database Connection Error (attempt ${attempt}/${maxRetries}): ${error.message}`);
+      if (attempt < maxRetries) {
+        console.log(`Retrying in ${retryDelay / 1000}s...`);
+        await new Promise((r) => setTimeout(r, retryDelay));
+      } else {
+        console.error('All connection attempts failed. Exiting.');
+        process.exit(1);
+      }
+    }
   }
 };
 

@@ -12,7 +12,7 @@ const Spinner = () => (
 const DetailRow = ({ label, value }) => (
   <div className="flex items-start gap-4 py-3.5 border-b border-gray-100 last:border-0">
     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-28 shrink-0 mt-0.5">{label}</span>
-    <span className="text-sm text-accent-dark font-medium">{value || 'Not specified'}</span>
+    <span className="text-sm text-gray-900 font-medium">{value || 'Not specified'}</span>
   </div>
 );
 
@@ -78,22 +78,22 @@ const ProfileDetails = () => {
 
   const photoUrl = profile.photo
     ? `/uploads/${profile.photo}`
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&size=300&background=E63946&color=fff`;
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&size=300&background=111827&color=fff`;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="min-h-screen bg-[#fafaf9] py-10 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Back button */}
         <button
           onClick={() => navigate(-1)}
-          className="mb-6 flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-accent-dark transition-colors"
+          className="mb-6 flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-gray-900 transition-colors"
         >
           â† Back
         </button>
 
         <div className="bg-white rounded-2xl shadow-card overflow-hidden">
           {/* Hero banner */}
-          <div className="h-36 bg-gradient-to-r from-accent-dark to-accent" />
+          <div className="h-36 bg-gradient-to-r from-gray-900 to-gray-700" />
 
           {/* Profile header */}
           <div className="px-8 pb-6">
@@ -107,7 +107,7 @@ const ProfileDetails = () => {
 
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h2 className="text-2xl font-extrabold text-accent-dark">{profile.name}</h2>
+                <h2 className="text-2xl font-extrabold text-gray-900">{profile.name}</h2>
                 <p className="text-gray-500 text-sm mt-1">
                   {profile.age} years &bull; {profile.gender} &bull; {profile.city}
                 </p>
@@ -153,13 +153,13 @@ const ProfileDetails = () => {
             <div className="px-8 pb-8 flex flex-wrap gap-3">
               <button
                 onClick={handleSendInterest}
-                className="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                className="px-6 py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-semibold rounded-full transition-all duration-200"
               >
                 ðŸ’Œ Send Interest
               </button>
               <button
                 onClick={handleToggleFavourite}
-                className="px-6 py-2.5 border border-accent text-accent hover:bg-accent hover:text-white text-sm font-semibold rounded-xl transition-all duration-200"
+                className="px-6 py-2.5 border border-gray-200 text-gray-900 hover:bg-gray-900 hover:text-white text-sm font-semibold rounded-full transition-all duration-200"
               >
                 â­ Favourite
               </button>

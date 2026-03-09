@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all duration-200 bg-white';
-const labelCls = 'block text-xs font-semibold text-gray-500 mb-1.5';
+const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all duration-200 bg-white';
+const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -67,18 +67,18 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream to-accent-light/30 flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-[#fafaf9] flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-1 text-2xl font-extrabold">
-            <span className="text-brand-500">True</span><span className="text-accent-dark">Match</span>
+          <Link to="/" className="inline-flex items-center gap-1 text-2xl font-bold tracking-tight">
+            <span className="text-brand-500">True</span><span className="text-gray-900">Match</span>
           </Link>
-          <h2 className="mt-4 text-2xl font-bold text-accent-dark">Create Your Account</h2>
-          <p className="mt-1 text-sm text-gray-500">Join thousands finding their perfect partner</p>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Create Your Account</h2>
+          <p className="mt-2 text-sm text-gray-400">Join thousands finding their perfect partner</p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-card-hover p-8">
+        <div className="bg-white rounded-2xl shadow-card p-8 border border-gray-100">
           {error && (
             <div className="mb-5 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
               {error}
@@ -160,7 +160,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 mt-2 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60"
+              className="w-full py-3 mt-2 bg-gray-900 hover:bg-black text-white font-semibold rounded-full transition-all duration-200 disabled:opacity-60"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
@@ -168,7 +168,7 @@ const Register = () => {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{' '}
-            <Link to="/login" className="text-brand-500 font-semibold hover:text-brand-600">
+            <Link to="/login" className="text-gray-900 font-semibold hover:underline">
               Login here
             </Link>
           </p>

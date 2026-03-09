@@ -1,5 +1,5 @@
-const inputCls = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all duration-200 bg-white";
-const labelCls = "block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5";
+const inputCls = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all duration-200 bg-white";
+const labelCls = "block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5";
 
 const FilterPanel = ({ filters, setFilters, onSearch }) => {
   const handleChange = (e) => {
@@ -18,7 +18,7 @@ const FilterPanel = ({ filters, setFilters, onSearch }) => {
 
   return (
     <div className="bg-white rounded-2xl shadow-card p-5 mb-7">
-      <h3 className="text-sm font-bold text-accent-dark mb-4 flex items-center gap-2">
+      <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
         <span className="text-brand-500">ðŸ”</span> Filter Profiles
       </h3>
       <form onSubmit={handleSubmit}>
@@ -98,7 +98,7 @@ const FilterPanel = ({ filters, setFilters, onSearch }) => {
         <div className="flex gap-3 mt-5">
           <button
             type="submit"
-            className="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+            className="px-6 py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-semibold rounded-full transition-all duration-200"
           >
             Search
           </button>

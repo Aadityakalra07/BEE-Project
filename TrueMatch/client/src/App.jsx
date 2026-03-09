@@ -7,6 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { useAuth } from './context/AuthContext';
+import useSmoothScroll from './hooks/useSmoothScroll';
 
 // Components
 import Navbar from './components/Navbar';
@@ -41,6 +42,7 @@ const AdminRoute = ({ children }) => {
 
 function App() {
   const { user } = useAuth();
+  useSmoothScroll();
 
   return (
     <>

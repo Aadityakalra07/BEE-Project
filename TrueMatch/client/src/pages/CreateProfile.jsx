@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
-const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all duration-200 bg-white';
-const labelCls = 'block text-xs font-semibold text-gray-500 mb-1.5';
+const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all duration-200 bg-white';
+const labelCls = 'block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5';
 
 const CreateProfile = () => {
   const { user } = useAuth();
@@ -68,10 +68,10 @@ const CreateProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="min-h-screen bg-[#fafaf9] py-10 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-extrabold text-accent-dark">Complete Your Profile</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900">Complete Your Profile</h1>
           <p className="text-sm text-gray-500 mt-1">Fill in your details to start appearing in search results</p>
         </div>
 
@@ -88,7 +88,7 @@ const CreateProfile = () => {
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 {photoPreview ? (
-                  <img src={photoPreview} alt="Preview" className="w-28 h-28 rounded-full object-cover ring-4 ring-brand-100" />
+                  <img src={photoPreview} alt="Preview" className="w-28 h-28 rounded-full object-cover ring-4 ring-gray-100" />
                 ) : (
                   <div className="w-28 h-28 rounded-full bg-gray-100 flex items-center justify-center text-4xl ring-4 ring-gray-200">
                     ðŸ“·
@@ -96,7 +96,7 @@ const CreateProfile = () => {
                 )}
               </div>
               <label className="cursor-pointer">
-                <span className="text-sm font-semibold text-accent hover:text-accent-dark border border-accent hover:border-accent-dark px-4 py-2 rounded-xl transition-all duration-200">
+                <span className="text-sm font-semibold text-gray-900 hover:text-black border border-gray-200 hover:border-gray-900 px-4 py-2 rounded-full transition-all duration-200">
                   {photoPreview ? 'Change Photo' : 'Upload Photo'}
                 </span>
                 <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
@@ -164,7 +164,7 @@ const CreateProfile = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60"
+              className="w-full py-3 bg-gray-900 hover:bg-black text-white font-semibold rounded-full transition-all duration-200 disabled:opacity-60"
             >
               {loading ? 'Saving...' : 'Save Profile'}
             </button>

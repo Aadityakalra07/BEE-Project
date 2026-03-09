@@ -37,11 +37,11 @@ const SearchProfiles = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fafaf9]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
         <div className="mb-7">
-          <h1 className="text-2xl font-extrabold text-accent-dark">Search Profiles</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900">Search Profiles</h1>
           <p className="text-sm text-gray-500 mt-1">Find your perfect match using filters</p>
         </div>
 
@@ -52,7 +52,7 @@ const SearchProfiles = () => {
         ) : profiles.length > 0 ? (
           <>
             <p className="text-sm text-gray-500 mb-5">
-              Showing <span className="font-semibold text-accent-dark">{profiles.length}</span> profile{profiles.length !== 1 ? 's' : ''}
+              Showing <span className="font-semibold text-gray-900">{profiles.length}</span> profile{profiles.length !== 1 ? 's' : ''}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {profiles.map((profile) => (

@@ -73,17 +73,17 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fafaf9]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-extrabold text-accent-dark">Admin Dashboard</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900">Admin Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Manage all users and profiles</p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-9">
-          <StatCard value={users.length} label="Total Users" color="text-accent-dark" />
+          <StatCard value={users.length} label="Total Users" color="text-gray-900" />
           <StatCard value={users.filter((u) => u.isApproved).length} label="Approved Profiles" color="text-green-600" />
           <StatCard value={pendingUsers.length} label="Pending Approval" color="text-amber-600" />
           <StatCard value={reported.length} label="Reported Profiles" color="text-red-500" />
@@ -97,8 +97,8 @@ const AdminDashboard = () => {
               onClick={() => setActiveTab(key)}
               className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-150 ${
                 activeTab === key
-                  ? 'bg-brand-500 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-accent-dark'
+                  ? 'bg-gray-900 text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-900'
               }`}
             >
               {label}
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
                 <tbody className="divide-y divide-gray-50">
                   {displayUsers.map((u) => (
                     <tr key={u._id} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="px-5 py-4 font-semibold text-accent-dark">{u.name}</td>
+                      <td className="px-5 py-4 font-semibold text-gray-900">{u.name}</td>
                       <td className="px-5 py-4 text-gray-500">{u.email}</td>
                       <td className="px-5 py-4 text-gray-500">{u.gender || '-'}</td>
                       <td className="px-5 py-4 text-gray-500">{u.city || '-'}</td>

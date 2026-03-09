@@ -29,10 +29,10 @@ const Favourites = () => {
   if (loading) return <Spinner />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fafaf9]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-7">
-          <h1 className="text-2xl font-extrabold text-accent-dark">My Favourites â­</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900">My Favourites â­</h1>
           <p className="text-sm text-gray-500 mt-1">Profiles you have saved</p>
         </div>
 

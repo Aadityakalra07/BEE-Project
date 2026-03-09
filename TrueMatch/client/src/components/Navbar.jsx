@@ -20,10 +20,8 @@ const Navbar = () => {
     <Link
       to={to}
       onClick={() => setMenuOpen(false)}
-      className={`text-sm font-medium transition-colors duration-150 ${
-        isActive(to)
-          ? 'text-brand-500'
-          : 'text-accent-dark hover:text-brand-500'
+      className={`text-[13px] font-medium tracking-wide transition-colors duration-200 ${
+        isActive(to) ? 'text-gray-900' : 'text-gray-400 hover:text-gray-900'
       }`}
     >
       {label}
@@ -31,18 +29,14 @@ const Navbar = () => {
   );
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-nav">
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Brand */}
-          <Link to="/" className="flex items-center gap-1 text-xl font-extrabold tracking-tight">
-            <span className="text-brand-500">True</span>
-            <span className="text-accent-dark">Match</span>
-
+        <div className="flex items-center justify-between h-14">
+          <Link to="/" className="flex items-center gap-1.5 text-lg font-bold tracking-tight text-gray-900">
+            <span className="text-brand-500">True</span>Match
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-7">
+          <div className="hidden md:flex items-center gap-8">
             {user ? (
               <>
                 {navLink('/dashboard', 'Dashboard')}
@@ -52,39 +46,37 @@ const Navbar = () => {
                 {user.role === 'admin' && navLink('/admin', 'Admin')}
                 <button
                   onClick={handleLogout}
-                  className="ml-2 text-sm font-semibold border border-brand-500 text-brand-500 hover:bg-brand-500 hover:text-white px-4 py-1.5 rounded-xl transition-all duration-200"
+                  className="ml-1 text-[13px] font-medium text-gray-400 hover:text-gray-900 transition-colors duration-200"
                 >
                   Logout
                 </button>
               </>
             ) : (
               <>
-                {navLink('/login', 'Login')}
+                {navLink('/login', 'Sign in')}
                 <Link
                   to="/register"
-                  className="text-sm font-semibold bg-brand-500 hover:bg-brand-600 text-white px-5 py-2 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="text-[13px] font-semibold bg-gray-900 hover:bg-black text-white px-5 py-2 rounded-full transition-all duration-200"
                 >
-                  Register Free
+                  Get Started
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile hamburger */}
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden flex flex-col gap-[5px] p-2 rounded-lg hover:bg-gray-50 transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
-            <span className={`block w-5 h-0.5 bg-accent-dark transition-all duration-200 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-accent-dark transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-accent-dark transition-all duration-200 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+            <span className={`block w-5 h-[1.5px] bg-gray-900 transition-all duration-200 ${menuOpen ? 'rotate-45 translate-y-[6.5px]' : ''}`} />
+            <span className={`block w-5 h-[1.5px] bg-gray-900 transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-[1.5px] bg-gray-900 transition-all duration-200 ${menuOpen ? '-rotate-45 -translate-y-[6.5px]' : ''}`} />
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {menuOpen && (
-          <div className="md:hidden pb-4 pt-2 flex flex-col gap-3 border-t border-gray-100 animate-fade-in">
+          <div className="md:hidden pb-5 pt-3 flex flex-col gap-3 border-t border-gray-100 animate-fade-in">
             {user ? (
               <>
                 {navLink('/dashboard', 'Dashboard')}
@@ -92,22 +84,15 @@ const Navbar = () => {
                 {navLink('/interests', 'Interests')}
                 {navLink('/favourites', 'Favourites')}
                 {user.role === 'admin' && navLink('/admin', 'Admin Panel')}
-                <button
-                  onClick={handleLogout}
-                  className="text-left text-sm font-semibold text-brand-500 hover:text-brand-600"
-                >
+                <button onClick={handleLogout} className="text-left text-[13px] font-medium text-gray-400 hover:text-gray-900">
                   Logout
                 </button>
               </>
             ) : (
               <>
-                {navLink('/login', 'Login')}
-                <Link
-                  to="/register"
-                  onClick={() => setMenuOpen(false)}
-                  className="text-sm font-semibold text-brand-500"
-                >
-                  Register Free
+                {navLink('/login', 'Sign in')}
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="text-[13px] font-semibold text-gray-900">
+                  Get Started
                 </Link>
               </>
             )}

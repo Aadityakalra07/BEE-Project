@@ -61,10 +61,10 @@ const Interests = () => {
   const currentList = tab === 'received' ? received : sent;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#fafaf9]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-7">
-          <h1 className="text-2xl font-extrabold text-accent-dark">Interest Requests</h1>
+          <h1 className="text-2xl font-extrabold text-gray-900">Interest Requests</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your received and sent interests</p>
         </div>
 
@@ -76,8 +76,8 @@ const Interests = () => {
               onClick={() => setTab(key)}
               className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-150 ${
                 tab === key
-                  ? 'bg-brand-500 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-accent-dark'
+                  ? 'bg-gray-900 text-white shadow-sm'
+                  : 'text-gray-400 hover:text-gray-900'
               }`}
             >
               {label}
@@ -92,7 +92,7 @@ const Interests = () => {
               const person = tab === 'received' ? interest.sender : interest.receiver;
               const photoUrl = person?.photo
                 ? `/uploads/${person.photo}`
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(person?.name || 'U')}&size=80&background=E63946&color=fff`;
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(person?.name || 'U')}&size=80&background=111827&color=fff`;
 
               return (
                 <div key={interest._id} className="bg-white rounded-2xl shadow-card p-5 flex items-center gap-4">
@@ -102,7 +102,7 @@ const Interests = () => {
                     className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-100 shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-accent-dark truncate">
+                    <h4 className="font-bold text-gray-900 truncate">
                       <Link to={`/profile/${person?._id}`} className="hover:text-brand-500 transition-colors">
                         {person?.name}
                       </Link>
