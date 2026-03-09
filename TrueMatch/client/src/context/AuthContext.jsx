@@ -38,8 +38,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register function
-  const register = async (name, email, password, gender) => {
-    const res = await axios.post('/api/auth/register', { name, email, password, gender });
+  const register = async (name, email, password, gender, dob) => {
+    const res = await axios.post('/api/auth/register', { name, email, password, gender, dob });
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));

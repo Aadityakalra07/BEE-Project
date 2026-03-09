@@ -22,7 +22,20 @@ const generateToken = (id) => {
 // =============================================
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, gender } = req.body;
+    const { name, email, password, gender, dob } = req.body;
+
+    // Age restriction: must be at least 21
+    if (!dob) {
+      return res.status(400).json({ message: 'Date of birth is required' });
+    }
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+    if (age < 21) {
+      return res.status(400).json({ message: 'You must be at least 21 years old to register' });
+    }
 
     // Check if user already exists
     const userExists = await User.findOne({ email });

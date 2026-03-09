@@ -38,7 +38,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-1 text-xl font-extrabold tracking-tight">
             <span className="text-brand-500">True</span>
             <span className="text-accent-dark">Match</span>
-            <span className="ml-1 text-xs font-medium text-white bg-brand-500 px-1.5 py-0.5 rounded-full">â¤</span>
+
           </Link>
 
           {/* Desktop Nav */}

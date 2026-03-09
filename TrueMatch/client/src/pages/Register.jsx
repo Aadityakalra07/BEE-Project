@@ -9,6 +9,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    dob: '',
     password: '',
     confirmPassword: '',
     gender: '',
@@ -28,8 +29,19 @@ const Register = () => {
     setError('');
 
     // Validation
-    if (!formData.name || !formData.email || !formData.password || !formData.gender) {
+    if (!formData.name || !formData.email || !formData.dob || !formData.password || !formData.gender) {
       setError('Please fill in all fields');
+      return;
+    }
+
+    // Age restriction: must be at least 21
+    const today = new Date();
+    const birthDate = new Date(formData.dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+    if (age < 21) {
+      setError('You must be at least 21 years old to register');
       return;
     }
 
@@ -45,7 +57,7 @@ const Register = () => {
 
     try {
       setLoading(true);
-      await register(formData.name, formData.email, formData.password, formData.gender);
+      await register(formData.name, formData.email, formData.password, formData.gender, formData.dob);
       navigate('/create-profile');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -96,6 +108,19 @@ const Register = () => {
                 className={inputCls}
                 placeholder="you@example.com"
               />
+            </div>
+
+            <div>
+              <label className={labelCls}>Date of Birth</label>
+              <input
+                type="date"
+                name="dob"
+                value={formData.dob}
+                onChange={handleChange}
+                className={inputCls}
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 21)).toISOString().split('T')[0]}
+              />
+              <p className="text-xs text-gray-400 mt-1">You must be at least 21 years old to register.</p>
             </div>
 
             <div>

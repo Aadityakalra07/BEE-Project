@@ -48,7 +48,7 @@ const Dashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-extrabold text-accent-dark">
-              Welcome back, {user?.name?.split(' ')[0]}! ðŸ‘‹
+              Welcome back, {user?.name?.split(' ')[0]}!
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               {profile?.isApproved
