@@ -66,7 +66,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-100 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-300">
-            &copy; {year} TrueMatch. All rights reserved.
+            © {year} TrueMatch. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
             {['Twitter', 'Instagram', 'LinkedIn'].map((social) => (
