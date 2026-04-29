@@ -1,0 +1,16 @@
+{
+  "name": "TrueMatch - Find Your Soulmate",
+  "short_name": "TrueMatch",
+  "description": "India's most trusted premium matrimonial platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#8B1A2B",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["social", "lifestyle"]
+}

@@ -23,6 +23,7 @@ const {
   adminApproveProfile,
   adminDeleteUser,
   adminGetReported,
+  getCompatibleProfiles,
 } = require('../controllers/profileController');
 
 const { protect, adminOnly } = require('../middleware/authMiddleware');
@@ -67,6 +68,9 @@ const upload = multer({
 
 // GET /api/profile/search - Search profiles with filters
 router.get('/search', protect, searchProfiles);
+
+// GET /api/profile/compatible - Get profiles sorted by compatibility
+router.get('/compatible', protect, getCompatibleProfiles);
 
 // GET /api/profile/favourites - Get my favourite profiles
 router.get('/favourites', protect, getFavourites);

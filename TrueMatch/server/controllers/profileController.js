@@ -3,9 +3,11 @@
 // Syllabus: Route Handlers, Response Methods
 // =============================================
 // Handles all profile-related operations:
-// create, update, search, filter, favourites, admin actions
+// create, update, search, filter, favourites, admin actions,
+// compatibility matching
 
 const User = require('../models/User');
+const Interest = require('../models/Interest');
 
 // =============================================
 // @desc    Create / Update user profile
@@ -14,7 +16,7 @@ const User = require('../models/User');
 // =============================================
 const updateProfile = async (req, res) => {
   try {
-    const { age, religion, caste, profession, education, city, bio } = req.body;
+    const { age, religion, caste, profession, education, city, bio, partnerPreferences } = req.body;
 
     // Build update object
     const profileData = {
@@ -27,6 +29,21 @@ const updateProfile = async (req, res) => {
       bio,
       isProfileComplete: true,
     };
+
+    // Parse and add partner preferences if provided
+    if (partnerPreferences) {
+      const prefs = typeof partnerPreferences === 'string'
+        ? JSON.parse(partnerPreferences)
+        : partnerPreferences;
+      profileData.partnerPreferences = {
+        minAge: prefs.minAge || undefined,
+        maxAge: prefs.maxAge || undefined,
+        religion: Array.isArray(prefs.religion) ? prefs.religion.filter(Boolean) : [],
+        city: Array.isArray(prefs.city) ? prefs.city.filter(Boolean) : [],
+        education: Array.isArray(prefs.education) ? prefs.education.filter(Boolean) : [],
+        profession: Array.isArray(prefs.profession) ? prefs.profession.filter(Boolean) : [],
+      };
+    }
 
     // If a photo was uploaded via Multer, add filename
     if (req.file) {
@@ -93,11 +110,18 @@ const searchProfiles = async (req, res) => {
     // Example: /api/profile/search?religion=Hindu&city=Mumbai&minAge=25&maxAge=35
     const { religion, city, profession, minAge, maxAge, gender } = req.query;
 
+    // Get current user's blocked list
+    const currentUser = await User.findById(req.user._id).select('blockedUsers');
+    const blockedIds = currentUser?.blockedUsers || [];
+
     // Build filter object dynamically
     const filter = {
-      _id: { $ne: req.user._id }, // Exclude current user
+      _id: { $ne: req.user._id, $nin: blockedIds },
       isProfileComplete: true,
       isApproved: true,
+      isSuspended: { $ne: true },
+      isHidden: { $ne: true },
+      blockedUsers: { $ne: req.user._id },
     };
 
     // Add filters only if provided (case-insensitive regex)
@@ -132,9 +156,10 @@ const getAllProfiles = async (req, res) => {
       _id: { $ne: req.user._id },
       isProfileComplete: true,
       isApproved: true,
+      isSuspended: { $ne: true },
     })
       .select('-password')
-      .sort({ createdAt: -1 });
+      .sort({ verificationLevel: -1, createdAt: -1 });
 
     res.json(profiles);
   } catch (error) {
@@ -265,6 +290,129 @@ const adminGetReported = async (req, res) => {
   }
 };
 
+// =============================================
+// COMPATIBILITY SCORING ALGORITHM
+// Weights: Age 20%, Religion 20%, City 15%,
+//          Education 15%, Profession 15%, Mutual Interest 15%
+// =============================================
+const calculateCompatibility = async (currentUser, otherUser) => {
+  let score = 0;
+  const prefs = currentUser.partnerPreferences || {};
+  const otherPrefs = otherUser.partnerPreferences || {};
+
+  // 1. AGE MATCH (20%) — bidirectional
+  let ageScore = 0;
+  // Does other user's age fall in my preference range?
+  if (prefs.minAge && prefs.maxAge && otherUser.age) {
+    if (otherUser.age >= prefs.minAge && otherUser.age <= prefs.maxAge) ageScore += 0.5;
+    else {
+      const dist = Math.min(Math.abs(otherUser.age - prefs.minAge), Math.abs(otherUser.age - prefs.maxAge));
+      ageScore += Math.max(0, 0.5 - dist * 0.05);
+    }
+  } else if (otherUser.age && currentUser.age) {
+    const diff = Math.abs(currentUser.age - otherUser.age);
+    ageScore += Math.max(0, 0.5 - diff * 0.04);
+  }
+  // Does my age fall in other user's preference range?
+  if (otherPrefs.minAge && otherPrefs.maxAge && currentUser.age) {
+    if (currentUser.age >= otherPrefs.minAge && currentUser.age <= otherPrefs.maxAge) ageScore += 0.5;
+    else ageScore += Math.max(0, 0.5 - Math.min(Math.abs(currentUser.age - otherPrefs.minAge), Math.abs(currentUser.age - otherPrefs.maxAge)) * 0.05);
+  } else { ageScore += 0.25; }
+  score += ageScore * 20;
+
+  // 2. RELIGION MATCH (20%)
+  let religionScore = 0;
+  if (prefs.religion?.length > 0 && otherUser.religion) {
+    religionScore += prefs.religion.some(r => r.toLowerCase() === otherUser.religion.toLowerCase()) ? 0.5 : 0;
+  } else { religionScore += 0.25; }
+  if (otherPrefs.religion?.length > 0 && currentUser.religion) {
+    religionScore += otherPrefs.religion.some(r => r.toLowerCase() === currentUser.religion.toLowerCase()) ? 0.5 : 0;
+  } else { religionScore += 0.25; }
+  score += religionScore * 20;
+
+  // 3. CITY MATCH (15%)
+  let cityScore = 0;
+  if (prefs.city?.length > 0 && otherUser.city) {
+    cityScore += prefs.city.some(c => c.toLowerCase() === otherUser.city.toLowerCase()) ? 0.5 : 0;
+  } else if (currentUser.city && otherUser.city && currentUser.city.toLowerCase() === otherUser.city.toLowerCase()) {
+    cityScore += 0.5;
+  } else { cityScore += 0.15; }
+  if (otherPrefs.city?.length > 0 && currentUser.city) {
+    cityScore += otherPrefs.city.some(c => c.toLowerCase() === currentUser.city.toLowerCase()) ? 0.5 : 0;
+  } else { cityScore += 0.15; }
+  score += cityScore * 15;
+
+  // 4. EDUCATION MATCH (15%)
+  let eduScore = 0;
+  if (prefs.education?.length > 0 && otherUser.education) {
+    eduScore += prefs.education.some(e => e.toLowerCase() === otherUser.education.toLowerCase()) ? 1 : 0;
+  } else if (currentUser.education && otherUser.education && currentUser.education.toLowerCase() === otherUser.education.toLowerCase()) {
+    eduScore += 0.7;
+  } else { eduScore += 0.3; }
+  score += eduScore * 15;
+
+  // 5. PROFESSION MATCH (15%)
+  let profScore = 0;
+  if (prefs.profession?.length > 0 && otherUser.profession) {
+    profScore += prefs.profession.some(p => otherUser.profession.toLowerCase().includes(p.toLowerCase())) ? 1 : 0;
+  } else { profScore += 0.3; }
+  score += profScore * 15;
+
+  // 6. MUTUAL INTEREST (15%) — do they have an accepted interest?
+  const mutualInterest = await Interest.findOne({
+    $or: [
+      { sender: currentUser._id, receiver: otherUser._id, status: 'accepted' },
+      { sender: otherUser._id, receiver: currentUser._id, status: 'accepted' },
+    ],
+  });
+  if (mutualInterest) score += 15;
+  else {
+    // Partial credit for pending interests
+    const pendingInterest = await Interest.findOne({
+      $or: [
+        { sender: currentUser._id, receiver: otherUser._id },
+        { sender: otherUser._id, receiver: currentUser._id },
+      ],
+    });
+    if (pendingInterest) score += 5;
+  }
+
+  return Math.min(99, Math.max(10, Math.round(score)));
+};
+
+// =============================================
+// @desc    Get compatible profiles (sorted by score)
+// @route   GET /api/profile/compatible
+// @access  Private
+// =============================================
+const getCompatibleProfiles = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user._id);
+    if (!currentUser) return res.status(404).json({ message: 'User not found' });
+
+    const profiles = await User.find({
+      _id: { $ne: req.user._id },
+      isProfileComplete: true,
+      isApproved: true,
+    }).select('-password');
+
+    // Calculate compatibility for each profile
+    const scored = await Promise.all(
+      profiles.map(async (profile) => {
+        const compatibilityScore = await calculateCompatibility(currentUser, profile);
+        return { ...profile.toObject(), compatibilityScore };
+      })
+    );
+
+    // Sort by compatibility (highest first)
+    scored.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+
+    res.json(scored);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching compatible profiles', error: error.message });
+  }
+};
+
 module.exports = {
   updateProfile,
   getMyProfile,
@@ -278,4 +426,5 @@ module.exports = {
   adminApproveProfile,
   adminDeleteUser,
   adminGetReported,
+  getCompatibleProfiles,
 };

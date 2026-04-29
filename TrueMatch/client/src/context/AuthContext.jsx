@@ -38,8 +38,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register function
-  const register = async (name, email, password, gender, dob) => {
-    const res = await axios.post('/api/auth/register', { name, email, password, gender, dob });
+  const register = async (payload) => {
+    const config = payload instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : undefined;
+    const res = await axios.post('/api/auth/register', payload, config);
+    const userData = res.data;
+    setUser(userData);
+    localStorage.setItem('truematch_user', JSON.stringify(userData));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+    return userData;
+  };
+
+  // Google login function
+  const loginWithGoogle = async (credential) => {
+    const res = await axios.post('/api/auth/google', { credential });
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));
@@ -55,7 +68,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

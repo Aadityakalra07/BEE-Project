@@ -1,6 +1,3 @@
-const inputCls = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-900 transition-all duration-200 bg-white";
-const labelCls = "block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5";
-
 const FilterPanel = ({ filters, setFilters, onSearch }) => {
   const handleChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -17,15 +14,15 @@ const FilterPanel = ({ filters, setFilters, onSearch }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-card p-5 mb-7">
-      <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <span className="text-brand-500">ðŸ”</span> Filter Profiles
+    <div className="glass-card rounded-2xl p-5 mb-7">
+      <h3 className="text-sm font-display font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <span className="text-brand-500">🔍</span> Filter Profiles
       </h3>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           <div>
-            <label className={labelCls}>Gender</label>
-            <select name="gender" value={filters.gender} onChange={handleChange} className={inputCls}>
+            <label className="label-premium">Gender</label>
+            <select name="gender" value={filters.gender} onChange={handleChange} className="input-premium">
               <option value="">All</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -33,80 +30,36 @@ const FilterPanel = ({ filters, setFilters, onSearch }) => {
           </div>
 
           <div>
-            <label className={labelCls}>Religion</label>
-            <input
-              type="text"
-              name="religion"
-              value={filters.religion}
-              onChange={handleChange}
-              className={inputCls}
-              placeholder="e.g. Hindu"
-            />
+            <label className="label-premium">Religion</label>
+            <input type="text" name="religion" value={filters.religion} onChange={handleChange} className="input-premium" placeholder="e.g. Hindu" />
           </div>
 
           <div>
-            <label className={labelCls}>City</label>
-            <input
-              type="text"
-              name="city"
-              value={filters.city}
-              onChange={handleChange}
-              className={inputCls}
-              placeholder="e.g. Mumbai"
-            />
+            <label className="label-premium">City</label>
+            <input type="text" name="city" value={filters.city} onChange={handleChange} className="input-premium" placeholder="e.g. Mumbai" />
           </div>
 
           <div>
-            <label className={labelCls}>Profession</label>
-            <input
-              type="text"
-              name="profession"
-              value={filters.profession}
-              onChange={handleChange}
-              className={inputCls}
-              placeholder="e.g. Engineer"
-            />
+            <label className="label-premium">Profession</label>
+            <input type="text" name="profession" value={filters.profession} onChange={handleChange} className="input-premium" placeholder="e.g. Engineer" />
           </div>
 
           <div>
-            <label className={labelCls}>Min Age</label>
-            <input
-              type="number"
-              name="minAge"
-              value={filters.minAge}
-              onChange={handleChange}
-              className={inputCls}
-              placeholder="18"
-              min="18"
-            />
+            <label className="label-premium">Min Age</label>
+            <input type="number" name="minAge" value={filters.minAge} onChange={handleChange} className="input-premium" placeholder="18" min="18" />
           </div>
 
           <div>
-            <label className={labelCls}>Max Age</label>
-            <input
-              type="number"
-              name="maxAge"
-              value={filters.maxAge}
-              onChange={handleChange}
-              className={inputCls}
-              placeholder="60"
-              max="100"
-            />
+            <label className="label-premium">Max Age</label>
+            <input type="number" name="maxAge" value={filters.maxAge} onChange={handleChange} className="input-premium" placeholder="60" max="100" />
           </div>
         </div>
 
         <div className="flex gap-3 mt-5">
-          <button
-            type="submit"
-            className="px-6 py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-semibold rounded-full transition-all duration-200"
-          >
+          <button type="submit" className="btn-primary text-sm">
             Search
           </button>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="px-6 py-2.5 border border-gray-300 hover:border-gray-400 text-gray-600 text-sm font-semibold rounded-xl transition-all duration-200"
-          >
+          <button type="button" onClick={handleReset} className="btn-secondary text-sm">
             Reset
           </button>
         </div>
