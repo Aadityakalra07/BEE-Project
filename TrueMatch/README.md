@@ -1,6 +1,57 @@
 # TrueMatch – Online Matrimonial Platform
 
-A full-stack matrimonial website built with **React.js**, **Node.js**, **Express.js**, and **MongoDB**.
+A full-stack matrimonial website built with **React.js**, **Node.js**, **Express.js**, and **MongoDB**, following the **MVC (Model-View-Controller)** architecture pattern.
+
+---
+
+## 🏗️ MVC Architecture
+
+This project strictly follows the **MVC (Model-View-Controller)** design pattern, where each layer has a clear, single responsibility:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       CLIENT (Browser)                      │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │    VIEW       │  │  CONTROLLER  │  │      MODEL       │  │
+│  │  (React UI)   │→ │  (Services)  │→ │  (Context/State) │  │
+│  │  pages/       │  │  services/   │  │  context/        │  │
+│  │  components/  │  │              │  │                  │  │
+│  └──────────────┘  └──────┬───────┘  └──────────────────┘  │
+│                           │ HTTP (Axios)                    │
+└───────────────────────────┼─────────────────────────────────┘
+                            │
+                     ┌──────▼──────┐
+                     │   ROUTES    │  (URL → Controller mapping)
+                     │  routes/    │
+                     └──────┬──────┘
+                            │
+┌───────────────────────────┼─────────────────────────────────┐
+│                       SERVER (Node.js + Express)            │
+│                           │                                 │
+│  ┌──────────────┐  ┌──────▼───────┐  ┌──────────────────┐  │
+│  │  MIDDLEWARE   │  │  CONTROLLER  │  │      MODEL       │  │
+│  │  middleware/  │→ │  controllers/│→ │  models/         │  │
+│  │  (auth, log,  │  │  (business   │  │  (Mongoose       │  │
+│  │   error, etc) │  │   logic)     │  │   schemas)       │  │
+│  └──────────────┘  └──────────────┘  └────────┬─────────┘  │
+│                                               │             │
+│                                        ┌──────▼──────┐      │
+│                                        │  MongoDB    │      │
+│                                        │  Database   │      │
+│                                        └─────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### MVC Layer Mapping
+
+| MVC Layer      | Server Side                | Client Side               |
+|----------------|----------------------------|---------------------------|
+| **Model**      | `models/` (Mongoose schemas: User, Interest, Message, Conversation, VerificationRequest) | `context/` (AuthContext, ThemeContext — app state) |
+| **View**       | `public/index.html` (static page) | `pages/` & `components/` (React UI) |
+| **Controller** | `controllers/` (business logic: auth, profile, interest, message, admin, settings) | `services/` (API communication layer) |
+| **Routes**     | `routes/` (URL → controller mapping) | React Router in `App.jsx` |
+| **Middleware**  | `middleware/` (auth, error, logger, rate-limiter) | — |
 
 ---
 
@@ -9,61 +60,102 @@ A full-stack matrimonial website built with **React.js**, **Node.js**, **Express
 ```
 TrueMatch/
 │
-├── server/                     # Backend (Node.js + Express)
-│   ├── server.js               # Main Express server
-│   ├── httpServer.js           # Node HTTP module example
-│   ├── seed.js                 # Sample data seed script
+├── server/                          # ── BACKEND (Node.js + Express) ──
+│   ├── server.js                    # Entry point (DB connect + server start)
+│   ├── app.js                       # Express app config (middleware + routes)
+│   ├── httpServer.js                # Node HTTP module example (no Express)
+│   ├── seed.js                      # Sample data seed script
 │   ├── package.json
-│   ├── .env                    # Environment variables
-│   ├── config/
-│   │   └── db.js               # MongoDB connection
-│   ├── models/
-│   │   ├── User.js             # User schema
-│   │   └── Interest.js         # Interest schema
-│   ├── controllers/
-│   │   ├── authController.js   # Register, Login, GetMe
-│   │   ├── profileController.js # CRUD, Search, Admin
-│   │   └── interestController.js # Send, Accept, Reject
-│   ├── routes/
-│   │   ├── authRoutes.js       # /api/auth/*
-│   │   ├── profileRoutes.js    # /api/profile/*
-│   │   └── interestRoutes.js   # /api/interest/*
-│   ├── middleware/
-│   │   ├── authMiddleware.js   # JWT verification
-│   │   ├── errorMiddleware.js  # Error handling
-│   │   └── loggerMiddleware.js # Custom request logger
-│   ├── uploads/                # Uploaded photos
-│   ├── public/
-│   │   └── index.html          # Static HTML page
-│   └── utils/
-│       └── fileStreamExample.js # File stream demo
+│   ├── .env                         # Environment variables
+│   │
+│   ├── config/                      # ── CONFIGURATION ──
+│   │   └── db.js                    #   MongoDB connection with retry logic
+│   │
+│   ├── models/                      # ── MODEL LAYER (Data/Schema) ──
+│   │   ├── User.js                  #   User schema (profile, auth, prefs)
+│   │   ├── Interest.js              #   Interest request schema
+│   │   ├── Message.js               #   Chat message schema
+│   │   ├── Conversation.js          #   Conversation thread schema
+│   │   └── VerificationRequest.js   #   ID/Photo verification schema
+│   │
+│   ├── controllers/                 # ── CONTROLLER LAYER (Business Logic) ──
+│   │   ├── authController.js        #   Register, Login, Google OAuth, GetMe
+│   │   ├── profileController.js     #   CRUD, Search, Favourites, Compatibility
+│   │   ├── interestController.js    #   Send, Accept, Reject interests
+│   │   ├── messageController.js     #   Conversations, Messages, Unread count
+│   │   ├── adminController.js       #   Stats, Suspend, Approve, Export, Verify
+│   │   └── settingsController.js    #   Privacy, Notifications, Password, Block
+│   │
+│   ├── routes/                      # ── ROUTE LAYER (URL → Controller) ──
+│   │   ├── authRoutes.js            #   /api/auth/*
+│   │   ├── profileRoutes.js         #   /api/profile/*
+│   │   ├── interestRoutes.js        #   /api/interest/*
+│   │   ├── messageRoutes.js         #   /api/messages/*
+│   │   ├── adminRoutes.js           #   /api/admin/*
+│   │   └── settingsRoutes.js        #   /api/settings/*
+│   │
+│   ├── middleware/                   # ── MIDDLEWARE LAYER ──
+│   │   ├── authMiddleware.js        #   JWT verification + admin guard
+│   │   ├── errorMiddleware.js       #   404 handler + global error handler
+│   │   ├── loggerMiddleware.js      #   Custom request logger
+│   │   └── rateLimiter.js           #   Rate limiting (auth + API)
+│   │
+│   ├── utils/                       # ── UTILITY LAYER ──
+│   │   └── fileStreamExample.js     #   File stream demo (fs.createReadStream)
+│   │
+│   ├── uploads/                     # Uploaded profile photos
+│   └── public/
+│       └── index.html               # Static HTML page (View)
 │
-├── client/                     # Frontend (React.js)
-│   ├── index.html
-│   ├── vite.config.js
+├── client/                          # ── FRONTEND (React.js SPA) ──
+│   ├── index.html                   # HTML entry point
+│   ├── vite.config.js               # Vite build config
 │   ├── package.json
 │   └── src/
-│       ├── main.jsx
-│       ├── App.jsx             # Routes & layout
-│       ├── index.css           # Global styles
-│       ├── context/
-│       │   └── AuthContext.jsx  # Auth state management
-│       ├── components/
+│       ├── main.jsx                 # React DOM render entry
+│       ├── App.jsx                  # Route definitions + layout
+│       ├── index.css                # Global styles + design tokens
+│       │
+│       ├── services/                # ── CONTROLLER LAYER (API Calls) ──
+│       │   ├── api.js               #   Axios instance + interceptors
+│       │   ├── authService.js       #   Auth API calls
+│       │   ├── profileService.js    #   Profile API calls
+│       │   ├── interestService.js   #   Interest API calls
+│       │   ├── messageService.js    #   Message API calls
+│       │   ├── adminService.js      #   Admin API calls
+│       │   ├── settingsService.js   #   Settings API calls
+│       │   └── index.js             #   Barrel export
+│       │
+│       ├── context/                 # ── MODEL LAYER (State Management) ──
+│       │   ├── AuthContext.jsx      #   Auth state (user, login, logout)
+│       │   └── ThemeContext.jsx     #   Theme state (dark/light mode)
+│       │
+│       ├── components/              # ── VIEW LAYER (Reusable UI) ──
 │       │   ├── Navbar.jsx
 │       │   ├── Footer.jsx
 │       │   ├── ProfileCard.jsx
-│       │   └── FilterPanel.jsx
-│       └── pages/
-│           ├── Home.jsx
-│           ├── Register.jsx
-│           ├── Login.jsx
-│           ├── Dashboard.jsx
-│           ├── CreateProfile.jsx
-│           ├── SearchProfiles.jsx
-│           ├── ProfileDetails.jsx
-│           ├── Interests.jsx
-│           ├── Favourites.jsx
-│           └── AdminDashboard.jsx
+│       │   ├── FilterPanel.jsx
+│       │   ├── QuickViewModal.jsx
+│       │   ├── Shimmer.jsx
+│       │   ├── Animations.jsx
+│       │   └── InstallPrompt.jsx
+│       │
+│       ├── pages/                   # ── VIEW LAYER (Page Components) ──
+│       │   ├── Home.jsx
+│       │   ├── Register.jsx
+│       │   ├── Login.jsx
+│       │   ├── Dashboard.jsx
+│       │   ├── CreateProfile.jsx
+│       │   ├── SearchProfiles.jsx
+│       │   ├── ProfileDetails.jsx
+│       │   ├── Interests.jsx
+│       │   ├── Favourites.jsx
+│       │   ├── Settings.jsx
+│       │   └── AdminDashboard.jsx
+│       │
+│       └── hooks/                   # ── CUSTOM HOOKS ──
+│           └── useSmoothScroll.js
+│
 └── .gitignore
 ```
 
@@ -175,16 +267,20 @@ Go to: **http://localhost:3000**
 
 ## 📚 Syllabus Concepts Mapping
 
-### 1. Client-Server Architecture
-**File:** `server/server.js`
+### 1. Client-Server Architecture & MVC Pattern
+**Files:** `server/server.js`, `server/app.js`
 - The backend (Express server on port 5000) acts as the **server**
 - The frontend (React on port 3000) acts as the **client**
 - They communicate via HTTP requests (REST API)
+- **MVC Architecture:** Model (`models/`) → Controller (`controllers/`) → View (`client/`)
+- `server.js` handles only DB connection + server startup (separation of concerns)
+- `app.js` handles all Express configuration, middleware, and route mounting
 
 ### 2. Understanding How Server Handles Requests
-**File:** `server/server.js`, `server/httpServer.js`
+**Files:** `server/app.js`, `server/httpServer.js`
 - When a request arrives, it passes through middleware → routes → controllers
 - The response is sent back as JSON data
+- MVC flow: Route receives request → Controller processes logic → Model interacts with DB
 
 ### 3. Installing NodeJS and Environment Setup
 **Files:** `server/package.json`, `server/.env`
@@ -219,12 +315,13 @@ Go to: **http://localhost:3000**
 - Custom: `./config/db`, `./models/User`, etc.
 
 ### 9. Express.js Framework
-**File:** `server/server.js`
+**File:** `server/app.js`
 - `const app = express()` creates an Express application
 - Uses `app.use()` for middleware, `app.get/post/put/delete` for routes
+- App configuration is separated from server startup (MVC best practice)
 
 ### 10. Serving Static Files
-**File:** `server/server.js`
+**File:** `server/app.js`
 ```javascript
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -256,11 +353,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 - Global error handler catches all unhandled errors
 
 ### 15. Middleware Lifecycle
-**File:** `server/server.js`
-Request flow: Client → cors → morgan → express.json → logger → routes → errorHandler → Response
+**File:** `server/app.js`
+Request flow: Client → cors → morgan → express.json → sanitize → logger → routes → errorHandler → Response
 
 ### 16. Application-Level Middleware
-**File:** `server/middleware/loggerMiddleware.js`, `server/server.js`
+**File:** `server/middleware/loggerMiddleware.js`, `server/app.js`
 - `app.use(logger)` - Runs on EVERY request
 - `app.use(express.json())` - Parses JSON body
 
@@ -275,7 +372,7 @@ Request flow: Client → cors → morgan → express.json → logger → routes 
 - `errorHandler` - Has 4 parameters `(err, req, res, next)` — Express recognizes this as error middleware
 
 ### 19. Third-Party Middleware
-**File:** `server/server.js`, `server/routes/profileRoutes.js`
+**File:** `server/app.js`, `server/routes/profileRoutes.js`
 - **cors** - Cross-Origin Resource Sharing (allows frontend to call backend)
 - **morgan** - HTTP request logger (logs method, URL, status, time)
 - **multer** - File upload middleware (handles `multipart/form-data`)
@@ -289,6 +386,15 @@ A: Client (browser/React) sends requests, Server (Express/Node) processes them a
 
 **Q: What is Express.js?**
 A: Express is a minimal, fast web framework for Node.js. It simplifies creating servers, handling routes, and middleware.
+
+**Q: What is MVC Architecture?**
+A: MVC (Model-View-Controller) separates an application into three layers: **Model** (data/database schemas in `models/`), **View** (UI presentation in React `pages/` and `components/`), and **Controller** (business logic in `controllers/` on server, `services/` on client). Routes map URLs to controllers. This separation makes the code modular, testable, and maintainable.
+
+**Q: Why separate `server.js` and `app.js`?**
+A: `app.js` configures the Express application (middleware, routes, error handling), while `server.js` handles server startup and database connection. This separation follows MVC best practices — it makes the app testable (you can import `app.js` without starting the server) and keeps concerns isolated.
+
+**Q: What is the Services layer in React?**
+A: The `services/` folder acts as the Controller layer on the client side. It centralizes all API calls using Axios, so React components (View) don't directly make HTTP requests. This keeps UI code clean and API logic reusable.
 
 **Q: What is Middleware?**
 A: Functions that execute between request and response. They can modify req/res objects, end the request, or call next().
@@ -324,15 +430,17 @@ A: HTTP module is Node's built-in basic server (manual routing). Express is a fr
 
 ## 🛠 Tech Stack Summary
 
-| Layer      | Technology    |
-|------------|---------------|
-| Frontend   | React.js      |
-| Styling    | CSS (custom)  |
-| Routing    | React Router  |
-| HTTP Client| Axios         |
-| Backend    | Node.js + Express.js |
-| Database   | MongoDB + Mongoose |
-| Auth       | JWT + bcryptjs |
-| File Upload| Multer        |
-| Logging    | Morgan (third-party) + Custom logger |
-| Build Tool | Vite          |
+| Layer          | Technology              | MVC Role            |
+|----------------|-------------------------|---------------------|
+| Frontend       | React.js                | View                |
+| API Services   | Axios                   | Controller (Client) |
+| State Mgmt     | React Context API       | Model (Client)      |
+| Styling        | Tailwind CSS            | View                |
+| Routing (FE)   | React Router            | Route (Client)      |
+| Backend        | Node.js + Express.js    | Controller (Server) |
+| Database       | MongoDB + Mongoose      | Model (Server)      |
+| Auth           | JWT + bcryptjs          | Middleware          |
+| File Upload    | Multer                  | Middleware          |
+| Logging        | Morgan + Custom logger  | Middleware          |
+| Security       | Helmet, Rate-Limit, XSS | Middleware          |
+| Build Tool     | Vite                    | —                   |

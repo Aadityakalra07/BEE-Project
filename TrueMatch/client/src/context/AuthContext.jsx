@@ -1,10 +1,17 @@
 // =============================================
-// AUTH CONTEXT
-// Manages user authentication state globally
+// AUTH CONTEXT (Model Layer - Client Side)
+// =============================================
+// MVC Role: Model — manages authentication state
+// Consumes: authService.js (Controller layer)
+// Consumed by: pages/ & components/ (View layer)
+//
+// Provides user state and auth actions to the
+// entire React component tree via Context API.
 // =============================================
 
 import { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import { loginUser as loginAPI, registerUser as registerAPI, googleLogin as googleLoginAPI } from '../services/authService';
+import API from '../services/api';
 
 const AuthContext = createContext();
 
@@ -21,42 +28,34 @@ export const AuthProvider = ({ children }) => {
     if (storedUser) {
       const parsed = JSON.parse(storedUser);
       setUser(parsed);
-      // Set default auth header for all axios requests
-      axios.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
     }
     setLoading(false);
   }, []);
 
-  // Login function
+  // Login function — delegates to authService (Controller)
   const login = async (email, password) => {
-    const res = await axios.post('/api/auth/login', { email, password });
+    const res = await loginAPI(email, password);
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));
-    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     return userData;
   };
 
-  // Register function
+  // Register function — delegates to authService (Controller)
   const register = async (payload) => {
-    const config = payload instanceof FormData
-      ? { headers: { 'Content-Type': 'multipart/form-data' } }
-      : undefined;
-    const res = await axios.post('/api/auth/register', payload, config);
+    const res = await registerAPI(payload);
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));
-    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     return userData;
   };
 
-  // Google login function
+  // Google login function — delegates to authService (Controller)
   const loginWithGoogle = async (credential) => {
-    const res = await axios.post('/api/auth/google', { credential });
+    const res = await googleLoginAPI(credential);
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));
-    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     return userData;
   };
 
@@ -64,7 +63,6 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('truematch_user');
-    delete axios.defaults.headers.common['Authorization'];
   };
 
   return (
