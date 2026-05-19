@@ -80,6 +80,7 @@ const Navbar = () => {
                 {navLink('/dashboard', 'Dashboard')}
                 {navLink('/search', 'Search')}
                 {navLink('/interests', 'Interests')}
+                {navLink('/chat', 'Messages')}
                 {navLink('/favourites', 'Favourites')}
                 {navLink('/settings', 'Settings')}
                 {user.role === 'admin' && navLink('/admin', 'Admin')}
@@ -128,6 +129,7 @@ const Navbar = () => {
                 {navLink('/dashboard', 'Dashboard')}
                 {navLink('/search', 'Search Profiles')}
                 {navLink('/interests', 'Interests')}
+                {navLink('/chat', 'Messages')}
                 {navLink('/favourites', 'Favourites')}
                 {navLink('/settings', 'Settings')}
                 {user.role === 'admin' && navLink('/admin', 'Admin Panel')}

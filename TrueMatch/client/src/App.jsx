@@ -22,6 +22,7 @@ import Interests from './pages/Interests';
 import Favourites from './pages/Favourites';
 import AdminDashboard from './pages/AdminDashboard';
 import Settings from './pages/Settings';
+import Chat from './pages/Chat';
 
 /* ── Animated Page Wrapper ── */
 const pageVariants = {
@@ -84,6 +85,8 @@ function App() {
             <Route path="/profile/:id" element={<PrivateRoute><AnimatedPage><ProfileDetails /></AnimatedPage></PrivateRoute>} />
             <Route path="/interests" element={<PrivateRoute><AnimatedPage><Interests /></AnimatedPage></PrivateRoute>} />
             <Route path="/favourites" element={<PrivateRoute><AnimatedPage><Favourites /></AnimatedPage></PrivateRoute>} />
+            <Route path="/chat" element={<PrivateRoute><AnimatedPage><Chat /></AnimatedPage></PrivateRoute>} />
+            <Route path="/chat/:userId" element={<PrivateRoute><AnimatedPage><Chat /></AnimatedPage></PrivateRoute>} />
             <Route path="/settings" element={<PrivateRoute><AnimatedPage><Settings /></AnimatedPage></PrivateRoute>} />
             <Route path="/admin" element={<AdminRoute><AnimatedPage><AdminDashboard /></AnimatedPage></AdminRoute>} />
             <Route path="*" element={<Navigate to="/" />} />

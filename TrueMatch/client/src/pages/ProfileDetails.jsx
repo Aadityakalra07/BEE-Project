@@ -277,6 +277,7 @@ const ProfileDetails = () => {
           {!isOwn && (
             <div className="hidden sm:flex px-6 sm:px-8 pb-8 gap-3 flex-wrap">
               <button onClick={handleSendInterest} className="btn-primary text-sm">💌 Send Interest</button>
+              <Link to={`/chat/${id}`} className="btn-secondary text-sm inline-flex items-center gap-1.5">💬 Message</Link>
               <button onClick={handleToggleFavourite} className="btn-secondary text-sm">⭐ Favourite</button>
               <button onClick={handleShare} className="btn-secondary text-sm">📤 Share</button>
               <button onClick={handleReport}

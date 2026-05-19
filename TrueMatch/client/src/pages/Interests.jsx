@@ -84,6 +84,11 @@ const Interests = () => {
                     </p>
                     <div className="mt-2"><StatusBadge status={interest.status} /></div>
                   </div>
+                  {interest.status === 'accepted' && (
+                    <Link to={`/chat/${person?._id}`} className="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-xl transition-all shrink-0 flex items-center gap-1.5">
+                      💬 Message
+                    </Link>
+                  )}
                   {tab === 'received' && interest.status === 'pending' && (
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => handleAcceptReject(interest._id, 'accepted')} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-all">✓ Accept</button>
