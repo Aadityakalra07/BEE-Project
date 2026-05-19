@@ -297,7 +297,7 @@ const AdminDashboard = () => {
 
             <div className="glass-card rounded-2xl overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm min-w-[900px]" style={{ display: 'table' }}>
                   <thead>
                     <tr className="border-b border-brand-100/30 dark:border-dark-border/30">
                       {['Name', 'Email', 'Gender', 'City', 'Religion', 'Verification', 'Status', 'Actions'].map((h) => (
