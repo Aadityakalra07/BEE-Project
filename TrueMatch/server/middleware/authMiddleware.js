@@ -29,6 +29,11 @@ const protect = async (req, res, next) => {
       // Find user by ID from token (exclude password)
       req.user = await User.findById(decoded.id).select('-password');
 
+      // BUG 19 FIX: If user was deleted but token is still valid
+      if (!req.user) {
+        return res.status(401).json({ message: 'User no longer exists' });
+      }
+
       // Move to next middleware/route handler
       next();
     } catch (error) {

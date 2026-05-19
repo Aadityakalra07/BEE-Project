@@ -90,9 +90,25 @@ const approveAll = async (req, res) => {
 const exportUsersCSV = async (req, res) => {
   try {
     const users = await User.find().select('name email gender age religion city profession education isApproved isReported isSuspended verificationLevel createdAt').lean();
+
+    // Sanitize value for CSV: escape quotes, prevent formula injection
+    const sanitize = (val) => {
+      if (val === null || val === undefined) return '';
+      let str = String(val);
+      // Prevent CSV injection — prefix dangerous characters with a single quote
+      if (/^[=+\-@\t\r]/.test(str)) str = `'${str}`;
+      // Escape double quotes by doubling them, then wrap in quotes
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
     const headers = 'Name,Email,Gender,Age,Religion,City,Profession,Education,Approved,Reported,Suspended,Verification,Joined\n';
     const rows = users.map((u) =>
-      `"${u.name || ''}","${u.email || ''}","${u.gender || ''}",${u.age || ''},"${u.religion || ''}","${u.city || ''}","${u.profession || ''}","${u.education || ''}",${u.isApproved},${u.isReported},${u.isSuspended || false},"${u.verificationLevel || 'none'}","${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : ''}"`
+      [
+        sanitize(u.name), sanitize(u.email), sanitize(u.gender), u.age || '',
+        sanitize(u.religion), sanitize(u.city), sanitize(u.profession), sanitize(u.education),
+        u.isApproved, u.isReported, u.isSuspended || false, sanitize(u.verificationLevel),
+        u.createdAt ? `"${new Date(u.createdAt).toLocaleDateString()}"` : '',
+      ].join(',')
     ).join('\n');
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=truematch_users.csv');

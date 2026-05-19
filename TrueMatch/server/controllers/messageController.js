@@ -67,12 +67,6 @@ const getMessages = async (req, res) => {
   try {
     const otherUserId = req.params.userId;
 
-    // Mark messages from the other user as read
-    await Message.updateMany(
-      { sender: otherUserId, receiver: req.user._id, read: false },
-      { read: true }
-    );
-
     const messages = await Message.find({
       $or: [
         { sender: req.user._id, receiver: otherUserId },
@@ -83,6 +77,26 @@ const getMessages = async (req, res) => {
     res.json(messages);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching messages', error: error.message });
+  }
+};
+
+// =============================================
+// @desc    Mark messages from a user as read
+// @route   PUT /api/messages/:userId/read
+// @access  Private
+// =============================================
+const markAsRead = async (req, res) => {
+  try {
+    const otherUserId = req.params.userId;
+
+    const result = await Message.updateMany(
+      { sender: otherUserId, receiver: req.user._id, read: false },
+      { read: true }
+    );
+
+    res.json({ markedCount: result.modifiedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Error marking messages as read', error: error.message });
   }
 };
 
@@ -156,4 +170,4 @@ const getUnreadCount = async (req, res) => {
   }
 };
 
-module.exports = { getConversations, getMessages, sendMessage, getUnreadCount };
+module.exports = { getConversations, getMessages, sendMessage, getUnreadCount, markAsRead };

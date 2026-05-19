@@ -17,9 +17,6 @@ import axios from 'axios';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '',
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // ── Request Interceptor: Attach JWT token ──
@@ -42,9 +39,12 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid — clear stored user
+      // Token expired or invalid — clear stored user and redirect
       localStorage.removeItem('truematch_user');
-      // Optionally redirect to login (handled by AuthContext)
+      // Only redirect if not already on login/register page
+      if (!window.location.pathname.match(/^\/(login|register)?$/)) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

@@ -27,3 +27,8 @@ export const sendMessage = (userId, text) => {
 export const getUnreadCount = () => {
   return API.get('/api/messages/unread/count');
 };
+
+// PUT /api/messages/:userId/read - Mark messages from a user as read
+export const markAsRead = (userId) => {
+  return API.put(`/api/messages/${userId}/read`);
+};

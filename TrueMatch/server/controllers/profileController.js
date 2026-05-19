@@ -8,6 +8,9 @@
 
 const User = require('../models/User');
 const Interest = require('../models/Interest');
+const Message = require('../models/Message');
+const Conversation = require('../models/Conversation');
+const Report = require('../models/Report');
 
 // =============================================
 // @desc    Create / Update user profile
@@ -152,11 +155,17 @@ const searchProfiles = async (req, res) => {
 // =============================================
 const getAllProfiles = async (req, res) => {
   try {
+    // Get current user's blocked list
+    const currentUser = await User.findById(req.user._id).select('blockedUsers');
+    const blockedIds = currentUser?.blockedUsers || [];
+
     const profiles = await User.find({
-      _id: { $ne: req.user._id },
+      _id: { $ne: req.user._id, $nin: blockedIds },
       isProfileComplete: true,
       isApproved: true,
       isSuspended: { $ne: true },
+      isHidden: { $ne: true },
+      blockedUsers: { $ne: req.user._id },
     })
       .select('-password')
       .sort({ verificationLevel: -1, createdAt: -1 });
@@ -217,9 +226,36 @@ const getFavourites = async (req, res) => {
 // =============================================
 const reportProfile = async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.params.id, { isReported: true });
-    res.json({ message: 'Profile reported successfully' });
+    const reportedId = req.params.id;
+    const { reason, description } = req.body;
+
+    // Can't report yourself
+    if (req.user._id.toString() === reportedId) {
+      return res.status(400).json({ message: "You can't report yourself" });
+    }
+
+    // Check if already reported by this user (unique index will also catch this)
+    const existing = await Report.findOne({ reporter: req.user._id, reportedUser: reportedId });
+    if (existing) {
+      return res.status(400).json({ message: 'You have already reported this profile' });
+    }
+
+    // Create report record
+    await Report.create({
+      reporter: req.user._id,
+      reportedUser: reportedId,
+      reason: reason || 'other',
+      description: description || '',
+    });
+
+    // Also flag the user as reported for quick admin filtering
+    await User.findByIdAndUpdate(reportedId, { isReported: true });
+
+    res.json({ message: 'Profile reported successfully. Our team will review it.' });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'You have already reported this profile' });
+    }
     res.status(500).json({ message: 'Error reporting profile', error: error.message });
   }
 };
@@ -266,13 +302,25 @@ const adminApproveProfile = async (req, res) => {
 // @access  Private/Admin
 const adminDeleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const userId = req.params.id;
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ message: 'User deleted successfully' });
+    // BUG 20 FIX: Cascade delete all related data
+    await Promise.all([
+      Interest.deleteMany({ $or: [{ sender: userId }, { receiver: userId }] }),
+      Message.deleteMany({ $or: [{ sender: userId }, { receiver: userId }] }),
+      Conversation.deleteMany({ participants: userId }),
+      Report.deleteMany({ $or: [{ reporter: userId }, { reportedUser: userId }] }),
+      User.updateMany({ favourites: userId }, { $pull: { favourites: userId } }),
+      User.updateMany({ blockedUsers: userId }, { $pull: { blockedUsers: userId } }),
+    ]);
+    await User.findByIdAndDelete(userId);
+
+    res.json({ message: 'User and all related data deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting user', error: error.message });
   }
@@ -295,14 +343,14 @@ const adminGetReported = async (req, res) => {
 // Weights: Age 20%, Religion 20%, City 15%,
 //          Education 15%, Profession 15%, Mutual Interest 15%
 // =============================================
-const calculateCompatibility = async (currentUser, otherUser) => {
+// BUG 6 FIX: Accepts pre-fetched interests array to avoid N+1 queries
+const calculateCompatibility = (currentUser, otherUser, userInterests) => {
   let score = 0;
   const prefs = currentUser.partnerPreferences || {};
   const otherPrefs = otherUser.partnerPreferences || {};
 
   // 1. AGE MATCH (20%) — bidirectional
   let ageScore = 0;
-  // Does other user's age fall in my preference range?
   if (prefs.minAge && prefs.maxAge && otherUser.age) {
     if (otherUser.age >= prefs.minAge && otherUser.age <= prefs.maxAge) ageScore += 0.5;
     else {
@@ -313,7 +361,6 @@ const calculateCompatibility = async (currentUser, otherUser) => {
     const diff = Math.abs(currentUser.age - otherUser.age);
     ageScore += Math.max(0, 0.5 - diff * 0.04);
   }
-  // Does my age fall in other user's preference range?
   if (otherPrefs.minAge && otherPrefs.maxAge && currentUser.age) {
     if (currentUser.age >= otherPrefs.minAge && currentUser.age <= otherPrefs.maxAge) ageScore += 0.5;
     else ageScore += Math.max(0, 0.5 - Math.min(Math.abs(currentUser.age - otherPrefs.minAge), Math.abs(currentUser.age - otherPrefs.maxAge)) * 0.05);
@@ -358,24 +405,13 @@ const calculateCompatibility = async (currentUser, otherUser) => {
   } else { profScore += 0.3; }
   score += profScore * 15;
 
-  // 6. MUTUAL INTEREST (15%) — do they have an accepted interest?
-  const mutualInterest = await Interest.findOne({
-    $or: [
-      { sender: currentUser._id, receiver: otherUser._id, status: 'accepted' },
-      { sender: otherUser._id, receiver: currentUser._id, status: 'accepted' },
-    ],
-  });
-  if (mutualInterest) score += 15;
-  else {
-    // Partial credit for pending interests
-    const pendingInterest = await Interest.findOne({
-      $or: [
-        { sender: currentUser._id, receiver: otherUser._id },
-        { sender: otherUser._id, receiver: currentUser._id },
-      ],
-    });
-    if (pendingInterest) score += 5;
-  }
+  // 6. MUTUAL INTEREST (15%) — lookup from pre-fetched array
+  const otherId = otherUser._id.toString();
+  const interest = userInterests.find(i =>
+    (i.sender.toString() === otherId || i.receiver.toString() === otherId)
+  );
+  if (interest && interest.status === 'accepted') score += 15;
+  else if (interest) score += 5; // Partial credit for pending
 
   return Math.min(99, Math.max(10, Math.round(score)));
 };
@@ -396,13 +432,19 @@ const getCompatibleProfiles = async (req, res) => {
       isApproved: true,
     }).select('-password');
 
-    // Calculate compatibility for each profile
-    const scored = await Promise.all(
-      profiles.map(async (profile) => {
-        const compatibilityScore = await calculateCompatibility(currentUser, profile);
-        return { ...profile.toObject(), compatibilityScore };
-      })
-    );
+    // BUG 6 FIX: Pre-fetch ALL interests for current user in ONE query
+    const userInterests = await Interest.find({
+      $or: [
+        { sender: req.user._id },
+        { receiver: req.user._id },
+      ],
+    });
+
+    // Calculate compatibility using pre-fetched data (no N+1 queries)
+    const scored = profiles.map((profile) => {
+      const compatibilityScore = calculateCompatibility(currentUser, profile, userInterests);
+      return { ...profile.toObject(), compatibilityScore };
+    });
 
     // Sort by compatibility (highest first)
     scored.sort((a, b) => b.compatibilityScore - a.compatibilityScore);

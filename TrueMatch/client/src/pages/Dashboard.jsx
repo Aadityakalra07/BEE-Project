@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { getMyProfile, getCompatibleProfiles, getAllProfiles } from '../services/profileService';
+import { getReceivedInterests, getSentInterests } from '../services/interestService';
 import ProfileCard from '../components/ProfileCard';
 import { ShimmerBlock, ShimmerGrid } from '../components/Shimmer';
 
@@ -93,10 +94,10 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [profileRes, profilesRes, receivedRes, sentRes] = await Promise.all([
-          axios.get('/api/profile/me'),
-          axios.get('/api/profile/compatible').catch(() => axios.get('/api/profile')),
-          axios.get('/api/interest/received').catch(() => ({ data: [] })),
-          axios.get('/api/interest/sent').catch(() => ({ data: [] })),
+          getMyProfile(),
+          getCompatibleProfiles().catch(() => getAllProfiles()),
+          getReceivedInterests().catch(() => ({ data: [] })),
+          getSentInterests().catch(() => ({ data: [] })),
         ]);
         setProfile(profileRes.data);
         setAllProfiles(profilesRes.data);
@@ -122,11 +123,8 @@ const Dashboard = () => {
     sentInterests.filter((i) => i.status === 'accepted').length
   , [receivedInterests, sentInterests]);
 
-  // Simulated profile views (seeded from user ID)
-  const profileViews = useMemo(() => {
-    if (!user?._id) return 0;
-    return 12 + (user._id.charCodeAt(0) % 50);
-  }, [user]);
+  // BUG 24 FIX: Use real data — total profiles browsed (allProfiles count)
+  const profilesAvailable = allProfiles.length;
 
   /* ── Recently viewed (simulated — last 5 browsed) ── */
   const recentlyViewed = useMemo(() => allProfiles.slice(0, 5), [allProfiles]);
@@ -221,7 +219,7 @@ const Dashboard = () => {
 
           {/* Stats cards */}
           <div className="grid grid-cols-2 gap-4 lg:col-span-2">
-            <StatCard icon="👁️" value={profileViews} label="Profile Views" color="bg-blue-50 dark:bg-blue-900/20" />
+            <StatCard icon="👥" value={profilesAvailable} label="Profiles Available" color="bg-blue-50 dark:bg-blue-900/20" />
             <StatCard icon="💌" value={receivedInterests.length} label="Interests Received" color="bg-rose-50 dark:bg-rose-900/20" />
             <StatCard icon="📤" value={sentInterests.length} label="Interests Sent" color="bg-amber-50 dark:bg-amber-900/20" />
             <StatCard icon="💍" value={matchCount} label="Matches" color="bg-emerald-50 dark:bg-emerald-900/20" />

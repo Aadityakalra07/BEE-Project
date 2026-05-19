@@ -32,6 +32,8 @@ const Register = () => {
     }
     setError('');
     setProfilePic(file);
+    // BUG 18 FIX: Revoke old blob URL to prevent memory leak
+    if (profilePreview) URL.revokeObjectURL(profilePreview);
     setProfilePreview(URL.createObjectURL(file));
   };
 

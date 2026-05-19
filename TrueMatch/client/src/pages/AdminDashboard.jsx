@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import { getAdminStats, approveAll, toggleSuspend, exportUsersCSV, getVerificationRequests, reviewVerification, adminGetAllUsers, adminApproveProfile, adminDeleteUser } from '../services/adminService';
 import { ShimmerBlock } from '../components/Shimmer';
 import {
   LineChart, Line, PieChart, Pie, Cell, BarChart, Bar,
@@ -114,9 +114,9 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const [usersRes, statsRes, verifRes] = await Promise.all([
-        axios.get('/api/profile/admin/users'),
-        axios.get('/api/admin/stats').catch(() => ({ data: null })),
-        axios.get('/api/admin/verification-requests').catch(() => ({ data: [] })),
+        adminGetAllUsers(),
+        getAdminStats().catch(() => ({ data: null })),
+        getVerificationRequests().catch(() => ({ data: [] })),
       ]);
       setUsers(usersRes.data);
       setStats(statsRes.data);
@@ -127,24 +127,37 @@ const AdminDashboard = () => {
 
   /* ── Actions ── */
   const handleApprove = async (id) => {
-    try { await axios.put(`/api/profile/admin/approve/${id}`); fetchAll(); } catch (e) { console.error(e); }
+    try { await adminApproveProfile(id); fetchAll(); } catch (e) { console.error(e); }
   };
   const handleDelete = async (id) => {
     if (window.confirm('Delete this user permanently?')) {
-      try { await axios.delete(`/api/profile/admin/user/${id}`); fetchAll(); } catch (e) { console.error(e); }
+      try { await adminDeleteUser(id); fetchAll(); } catch (e) { console.error(e); }
     }
   };
   const handleSuspend = async (id) => {
-    try { await axios.put(`/api/admin/suspend/${id}`); fetchAll(); } catch (e) { console.error(e); }
+    try { await toggleSuspend(id); fetchAll(); } catch (e) { console.error(e); }
   };
   const handleApproveAll = async () => {
     if (window.confirm('Approve ALL pending profiles?')) {
-      try { const res = await axios.put('/api/admin/approve-all'); setActionMsg(res.data.message); fetchAll(); } catch (e) { console.error(e); }
+      try { const res = await approveAll(); setActionMsg(res.data.message); fetchAll(); } catch (e) { console.error(e); }
     }
   };
-  const handleExportCSV = () => { window.open('/api/admin/export-csv', '_blank'); };
+  const handleExportCSV = async () => {
+    try {
+      const res = await exportUsersCSV();
+      const blob = new Blob([res.data], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'truematch_users.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) { console.error(e); }
+  };
   const handleVerifReview = async (reqId, status) => {
-    try { await axios.put(`/api/admin/verification/${reqId}`, { status }); fetchAll(); } catch (e) { console.error(e); }
+    try { await reviewVerification(reqId, status); fetchAll(); } catch (e) { console.error(e); }
   };
 
   /* ── Filtered + paginated users ── */

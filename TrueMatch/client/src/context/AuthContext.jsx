@@ -10,6 +10,7 @@
 // =============================================
 
 import { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 import { loginUser as loginAPI, registerUser as registerAPI, googleLogin as googleLoginAPI } from '../services/authService';
 import API from '../services/api';
 
@@ -28,6 +29,8 @@ export const AuthProvider = ({ children }) => {
     if (storedUser) {
       const parsed = JSON.parse(storedUser);
       setUser(parsed);
+      // Set default auth header for all axios requests (legacy pages)
+      axios.defaults.headers.common['Authorization'] = `Bearer ${parsed.token}`;
     }
     setLoading(false);
   }, []);
@@ -38,6 +41,7 @@ export const AuthProvider = ({ children }) => {
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     return userData;
   };
 
@@ -47,6 +51,7 @@ export const AuthProvider = ({ children }) => {
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     return userData;
   };
 
@@ -56,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     const userData = res.data;
     setUser(userData);
     localStorage.setItem('truematch_user', JSON.stringify(userData));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
     return userData;
   };
 
@@ -63,6 +69,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('truematch_user');
+    delete axios.defaults.headers.common['Authorization'];
   };
 
   return (

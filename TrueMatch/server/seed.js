@@ -22,6 +22,12 @@ const seedData = async () => {
     // Clear existing data
     await User.deleteMany({});
     await Interest.deleteMany({});
+    const Message = require('./models/Message');
+    const Conversation = require('./models/Conversation');
+    const Report = require('./models/Report');
+    await Message.deleteMany({});
+    await Conversation.deleteMany({});
+    await Report.deleteMany({});
     console.log('Cleared old data');
 
     const salt = await bcrypt.genSalt(10);

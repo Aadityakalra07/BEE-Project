@@ -156,13 +156,31 @@ const googleLogin = async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    if (user && user.authProvider === 'local' && !user.googleId) {
-      return res.status(409).json({
-        message: 'An email/password account already exists with this email. Please sign in with password.',
-      });
-    }
+    if (user) {
+      // BUG 21 FIX: Block Google login for local-only accounts entirely
+      if (user.authProvider === 'local' && !user.googleId) {
+        return res.status(409).json({
+          message: 'An email/password account already exists with this email. Please sign in with password.',
+        });
+      }
 
-    if (!user) {
+      // Only update if this is already a Google-auth account
+      if (user.authProvider === 'google') {
+        let shouldSave = false;
+        if (!user.googleId) {
+          user.googleId = googleId;
+          shouldSave = true;
+        }
+        if (name && user.name !== name) {
+          user.name = name;
+          shouldSave = true;
+        }
+        if (shouldSave) {
+          await user.save();
+        }
+      }
+    } else {
+      // New user — create account with Google
       user = await User.create({
         name,
         email,
@@ -171,27 +189,6 @@ const googleLogin = async (req, res) => {
         googleId,
         photo: '',
       });
-    } else {
-      let shouldSave = false;
-
-      if (!user.googleId) {
-        user.googleId = googleId;
-        shouldSave = true;
-      }
-
-      if (user.authProvider !== 'google') {
-        user.authProvider = 'google';
-        shouldSave = true;
-      }
-
-      if (name && user.name !== name) {
-        user.name = name;
-        shouldSave = true;
-      }
-
-      if (shouldSave) {
-        await user.save();
-      }
     }
 
     return res.json({

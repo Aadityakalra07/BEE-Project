@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import { searchProfiles as searchProfilesAPI } from '../services/profileService';
 import ProfileCard from '../components/ProfileCard';
 import FilterPanel from '../components/FilterPanel';
 import QuickViewModal from '../components/QuickViewModal';
@@ -43,7 +43,7 @@ const SearchProfiles = () => {
       setLoading(true);
       const params = {};
       Object.keys(filters).forEach((key) => { if (filters[key]) params[key] = filters[key]; });
-      const res = await axios.get('/api/profile/search', { params });
+      const res = await searchProfilesAPI(params);
       setAllProfiles(res.data);
       setCurrentPage(1);
     } catch (err) {

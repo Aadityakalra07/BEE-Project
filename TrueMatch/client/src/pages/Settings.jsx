@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { getSettings as fetchSettingsAPI, updatePrivacy as updatePrivacyAPI, updateNotifications as updateNotificationsAPI, changePassword as changePasswordAPI, toggleBlockUser as toggleBlockUserAPI, deleteAccount as deleteAccountAPI, downloadMyData as downloadMyDataAPI } from '../services/settingsService';
 import { useAuth } from '../context/AuthContext';
 import { ShimmerBlock } from '../components/Shimmer';
 
@@ -29,7 +29,7 @@ const Settings = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await axios.get('/api/settings');
+        const res = await fetchSettingsAPI();
         setSettings(res.data);
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
@@ -41,7 +41,7 @@ const Settings = () => {
 
   const handlePrivacyChange = async (field, value) => {
     try {
-      await axios.put('/api/settings/privacy', { [field]: value });
+      await updatePrivacyAPI({ [field]: value });
       setSettings((s) => ({ ...s, [field]: value }));
       showMsg('Privacy settings updated');
     } catch (e) { showMsg(e.response?.data?.message || 'Error', 'error'); }
@@ -50,7 +50,7 @@ const Settings = () => {
   const handleNotifChange = async (field, value) => {
     try {
       const newNotifs = { ...settings.notifications, [field]: value };
-      await axios.put('/api/settings/notifications', newNotifs);
+      await updateNotificationsAPI(newNotifs);
       setSettings((s) => ({ ...s, notifications: newNotifs }));
       showMsg('Notification preferences updated');
     } catch (e) { showMsg(e.response?.data?.message || 'Error', 'error'); }
@@ -61,7 +61,7 @@ const Settings = () => {
     if (passwords.newPassword !== passwords.confirmPassword) { showMsg('Passwords do not match', 'error'); return; }
     if (passwords.newPassword.length < 6) { showMsg('Password must be 6+ characters', 'error'); return; }
     try {
-      const res = await axios.put('/api/settings/change-password', { currentPassword: passwords.currentPassword, newPassword: passwords.newPassword });
+      const res = await changePasswordAPI(passwords.currentPassword, passwords.newPassword);
       showMsg(res.data.message);
       setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (e) { showMsg(e.response?.data?.message || 'Error changing password', 'error'); }
@@ -69,7 +69,7 @@ const Settings = () => {
 
   const handleUnblock = async (userId) => {
     try {
-      await axios.put(`/api/settings/block/${userId}`);
+      await toggleBlockUserAPI(userId);
       setSettings((s) => ({ ...s, blockedUsers: s.blockedUsers.filter((u) => u._id !== userId) }));
       showMsg('User unblocked');
     } catch (e) { showMsg(e.response?.data?.message || 'Error', 'error'); }
@@ -79,13 +79,27 @@ const Settings = () => {
     if (!window.confirm('Are you sure? This will permanently delete your account and all data. This cannot be undone.')) return;
     if (!window.confirm('FINAL WARNING: All your profile data, messages, and interests will be deleted forever.')) return;
     try {
-      await axios.delete('/api/settings/account');
+      await deleteAccountAPI();
       logout();
       navigate('/');
     } catch (e) { showMsg(e.response?.data?.message || 'Error deleting account', 'error'); }
   };
 
-  const handleDownloadData = () => { window.open('/api/settings/download-data', '_blank'); };
+  const handleDownloadData = async () => {
+    try {
+      const res = await downloadMyDataAPI();
+      const blob = new Blob([res.data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'truematch_my_data.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showMsg('Data downloaded successfully');
+    } catch (e) { showMsg(e.response?.data?.message || 'Error downloading data', 'error'); }
+  };
 
   const tabs = [
     { key: 'account', label: '👤 Account', icon: '👤' },

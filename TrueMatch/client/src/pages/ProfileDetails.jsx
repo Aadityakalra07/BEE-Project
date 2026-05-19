@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { getProfileById, getCompatibleProfiles, toggleFavourite, reportProfile } from '../services/profileService';
+import { sendInterest, getReceivedInterests, getSentInterests } from '../services/interestService';
 import { useAuth } from '../context/AuthContext';
 import ProfileCard from '../components/ProfileCard';
 import { ShimmerBlock } from '../components/Shimmer';
@@ -82,21 +83,35 @@ const ProfileDetails = () => {
   const [compatibilityScore, setCompatibilityScore] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [isAcceptedMatch, setIsAcceptedMatch] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`/api/profile/${id}`);
+        const res = await getProfileById(id);
         setProfile(res.data);
         // Fetch compatible profiles to get real score + similar profiles
         try {
-          const compatRes = await axios.get('/api/profile/compatible');
+          const compatRes = await getCompatibleProfiles();
           const thisProfile = compatRes.data.find((p) => p._id === id);
           if (thisProfile) setCompatibilityScore(thisProfile.compatibilityScore);
           const similar = compatRes.data.filter((p) =>
             p._id !== id && (p.religion === res.data.religion || p.city === res.data.city)
           ).slice(0, 3);
           setSimilarProfiles(similar);
+        } catch (e) { /* ignore */ }
+        // BUG 17 FIX: Check if accepted match to show/hide Message button
+        try {
+          const [received, sent] = await Promise.all([
+            getReceivedInterests(),
+            getSentInterests(),
+          ]);
+          const allInterests = [...received.data, ...sent.data];
+          const match = allInterests.find((i) => {
+            const otherId = i.sender?._id === id ? i.sender._id : i.receiver?._id === id ? i.receiver._id : null;
+            return otherId && i.status === 'accepted';
+          });
+          setIsAcceptedMatch(!!match);
         } catch (e) { /* ignore */ }
       } catch (err) { console.error('Error fetching profile:', err); }
       finally { setLoading(false); }
@@ -106,16 +121,16 @@ const ProfileDetails = () => {
 
   /* ── Actions ── */
   const handleSendInterest = async () => {
-    try { const res = await axios.post(`/api/interest/${id}`); setMessage({ text: res.data.message, type: 'success' }); }
+    try { const res = await sendInterest(id); setMessage({ text: res.data.message, type: 'success' }); }
     catch (err) { setMessage({ text: err.response?.data?.message || 'Error sending interest', type: 'error' }); }
   };
   const handleToggleFavourite = async () => {
-    try { const res = await axios.put(`/api/profile/favourite/${id}`); setMessage({ text: res.data.message, type: 'success' }); }
+    try { const res = await toggleFavourite(id); setMessage({ text: res.data.message, type: 'success' }); }
     catch (err) { setMessage({ text: err.response?.data?.message || 'Error', type: 'error' }); }
   };
   const handleReport = async () => {
     if (window.confirm('Are you sure you want to report this profile?')) {
-      try { const res = await axios.put(`/api/profile/report/${id}`); setMessage({ text: res.data.message, type: 'success' }); }
+      try { const res = await reportProfile(id); setMessage({ text: res.data.message, type: 'success' }); }
       catch (err) { setMessage({ text: err.response?.data?.message || 'Error', type: 'error' }); }
     }
   };
@@ -277,7 +292,9 @@ const ProfileDetails = () => {
           {!isOwn && (
             <div className="hidden sm:flex px-6 sm:px-8 pb-8 gap-3 flex-wrap">
               <button onClick={handleSendInterest} className="btn-primary text-sm">💌 Send Interest</button>
-              <Link to={`/chat/${id}`} className="btn-secondary text-sm inline-flex items-center gap-1.5">💬 Message</Link>
+              {isAcceptedMatch && (
+                <Link to={`/chat/${id}`} className="btn-secondary text-sm inline-flex items-center gap-1.5">💬 Message</Link>
+              )}
               <button onClick={handleToggleFavourite} className="btn-secondary text-sm">⭐ Favourite</button>
               <button onClick={handleShare} className="btn-secondary text-sm">📤 Share</button>
               <button onClick={handleReport}

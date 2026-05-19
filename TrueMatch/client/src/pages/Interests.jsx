@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { getReceivedInterests, getSentInterests, updateInterestStatus } from '../services/interestService';
 import { Link } from 'react-router-dom';
 import { ShimmerProfileRow } from '../components/Shimmer';
 
@@ -25,14 +25,14 @@ const Interests = () => {
   const fetchInterests = async () => {
     try {
       setLoading(true);
-      const [receivedRes, sentRes] = await Promise.all([axios.get('/api/interest/received'), axios.get('/api/interest/sent')]);
+      const [receivedRes, sentRes] = await Promise.all([getReceivedInterests(), getSentInterests()]);
       setReceived(receivedRes.data); setSent(sentRes.data);
     } catch (err) { console.error('Error fetching interests:', err); }
     finally { setLoading(false); }
   };
 
   const handleAcceptReject = async (interestId, status) => {
-    try { await axios.put(`/api/interest/${interestId}`, { status }); fetchInterests(); }
+    try { await updateInterestStatus(interestId, status); fetchInterests(); }
     catch (err) { console.error('Error updating interest:', err); }
   };
 

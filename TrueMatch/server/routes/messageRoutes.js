@@ -9,6 +9,7 @@ const {
   getMessages,
   sendMessage,
   getUnreadCount,
+  markAsRead,
 } = require('../controllers/messageController');
 
 // GET /api/messages/unread/count - Get unread message count
@@ -19,6 +20,9 @@ router.get('/conversations', protect, getConversations);
 
 // GET /api/messages/:userId - Get messages with a user
 router.get('/:userId', protect, getMessages);
+
+// PUT /api/messages/:userId/read - Mark messages as read
+router.put('/:userId/read', protect, markAsRead);
 
 // POST /api/messages/:userId - Send message to a user
 router.post('/:userId', protect, sendMessage);

@@ -21,14 +21,19 @@ const sendInterest = async (req, res) => {
       return res.status(400).json({ message: "You can't send interest to yourself" });
     }
 
-    // Check if interest already exists
+    // Check if interest already exists in either direction
     const existingInterest = await Interest.findOne({
-      sender: senderId,
-      receiver: receiverId,
+      $or: [
+        { sender: senderId, receiver: receiverId },
+        { sender: receiverId, receiver: senderId },
+      ],
     });
 
     if (existingInterest) {
-      return res.status(400).json({ message: 'Interest already sent to this user' });
+      const msg = existingInterest.sender.toString() === senderId.toString()
+        ? 'Interest already sent to this user'
+        : 'This user has already sent you an interest — check your received interests!';
+      return res.status(400).json({ message: msg });
     }
 
     // Create new interest

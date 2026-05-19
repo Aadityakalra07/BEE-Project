@@ -9,7 +9,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getConversations, getMessages, sendMessage } from '../services/messageService';
+import { getConversations, getMessages, sendMessage, markAsRead } from '../services/messageService';
 
 /* ── Icons ── */
 const SendIcon = () => (
@@ -217,7 +217,7 @@ const MessageThread = ({ chatUser, messages, onSend, sending, onBack }) => {
     <div className="flex flex-col h-full">
       {/* ── Chat Header ── */}
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-brand-100/30 dark:border-dark-border/30 bg-white/70 dark:bg-dark-card/70 backdrop-blur-xl shrink-0">
-        <button onClick={onBack} className="md:hidden p-1.5 rounded-lg hover:bg-brand-50 dark:hover:bg-dark-bg transition-colors">
+        <button onClick={onBack} className="p-1.5 rounded-lg hover:bg-brand-50 dark:hover:bg-dark-bg transition-colors" title="Back to conversations">
           <BackIcon />
         </button>
         <Link to={`/profile/${chatUser._id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
@@ -360,25 +360,28 @@ const Chat = () => {
     return () => clearInterval(interval);
   }, [chatUser]);
 
-  // If userId is in URL, open that chat
+  // If userId is in URL, open that chat (even if no conversations exist yet)
   useEffect(() => {
-    if (userId && conversations.length > 0) {
-      const conv = conversations.find((c) => c.otherUser?._id === userId);
-      if (conv?.otherUser) {
-        handleSelectUser(conv.otherUser);
-      } else {
-        // User might not have a conversation yet — create a placeholder
-        handleSelectUser({ _id: userId, name: 'Loading...', photo: '' });
-        // Try to fetch their profile
-        import('../services/profileService').then(({ getProfileById }) => {
-          getProfileById(userId).then((res) => {
-            setChatUser(res.data);
-            setShowSidebar(false);
-          }).catch(() => {});
-        });
-      }
+    if (!userId || loadingConvos) return;
+
+    // Check if this user is in an existing conversation
+    const conv = conversations.find((c) => c.otherUser?._id === userId);
+    if (conv?.otherUser) {
+      setChatUser(conv.otherUser);
+      setShowSidebar(false);
+      fetchMessages(conv.otherUser._id);
+    } else {
+      // No conversation yet — fetch the user's profile and open chat directly
+      setChatUser({ _id: userId, name: 'Loading...', photo: '' });
+      setShowSidebar(false);
+      fetchMessages(userId);
+      import('../services/profileService').then(({ getProfileById }) => {
+        getProfileById(userId).then((res) => {
+          setChatUser(res.data);
+        }).catch(() => {});
+      });
     }
-  }, [userId, conversations]);
+  }, [userId, loadingConvos]);
 
   const fetchConversations = async () => {
     try {
@@ -408,6 +411,8 @@ const Chat = () => {
     setChatUser(otherUser);
     setShowSidebar(false);
     fetchMessages(otherUser._id);
+    // Explicitly mark messages from this user as read
+    markAsRead(otherUser._id).then(() => fetchConversations()).catch(() => {});
     navigate(`/chat/${otherUser._id}`, { replace: true });
   };
 

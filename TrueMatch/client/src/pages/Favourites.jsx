@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { getFavourites } from '../services/profileService';
 import ProfileCard from '../components/ProfileCard';
 import { ShimmerGrid } from '../components/Shimmer';
 
@@ -9,7 +9,7 @@ const Favourites = () => {
 
   useEffect(() => {
     const fetchFavourites = async () => {
-      try { const res = await axios.get('/api/profile/favourites'); setFavourites(res.data); }
+      try { const res = await getFavourites(); setFavourites(res.data); }
       catch (err) { console.error('Error fetching favourites:', err); }
       finally { setLoading(false); }
     };

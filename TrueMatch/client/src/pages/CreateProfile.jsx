@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { getMyProfile, updateProfile } from '../services/profileService';
 import { useAuth } from '../context/AuthContext';
 
 /* ── Tag Input Component ── */
@@ -52,7 +52,7 @@ const CreateProfile = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const res = await axios.get('/api/profile/me');
+        const res = await getMyProfile();
         const p = res.data;
         setFormData({
           age: p.age || '', religion: p.religion || '', caste: p.caste || '',
@@ -80,7 +80,12 @@ const CreateProfile = () => {
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
-    if (file) { setPhoto(file); setPhotoPreview(URL.createObjectURL(file)); }
+    if (file) {
+      // BUG 18 FIX: Revoke old blob URL to prevent memory leak
+      if (photoPreview && photoPreview.startsWith('blob:')) URL.revokeObjectURL(photoPreview);
+      setPhoto(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -96,7 +101,7 @@ const CreateProfile = () => {
       Object.keys(formData).forEach((key) => data.append(key, formData[key]));
       data.append('partnerPreferences', JSON.stringify(partnerPrefs));
       if (photo) data.append('photo', photo);
-      await axios.put('/api/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await updateProfile(data);
       setSuccess('Profile saved! Waiting for admin approval.');
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (err) {
@@ -146,7 +151,7 @@ const CreateProfile = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="label-premium">Age *</label>
-                  <input type="number" name="age" value={formData.age} onChange={handleChange} className="input-premium" placeholder="e.g. 25" min="18" max="100" />
+                  <input type="number" name="age" value={formData.age} onChange={handleChange} className="input-premium" placeholder="e.g. 25" min="21" max="100" />
                 </div>
                 <div>
                   <label className="label-premium">Religion *</label>
